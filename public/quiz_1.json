@@ -1,0 +1,33 @@
+{
+  "questions": [
+    {
+      "question": "What is the main task of science?",
+      "id": "question1",
+      "answers": [
+        "To entertain people",
+        "To explore the unknown",
+        "To create technology",
+        "To keep records"
+      ],
+      "correctAnswer": ["To explore the unknown"]
+    },
+    {
+      "question": "Which of the following is a branch of natural science?",
+      "id": "question2",
+      "answers": ["Literature", "Mathematics", "Biology", "Philosophy"],
+      "correctAnswer": ["Biology"]
+    },
+    {
+      "question": "What is the boiling point of water at sea level?",
+      "id": "question3",
+      "answers": ["90°C", "100°C", "110°C", "120°C"],
+      "correctAnswer": ["100°C"]
+    },
+    {
+      "question": "What is the study of the stars and planets known as?",
+      "id": "question4",
+      "answers": ["Geology", "Biology", "Astronomy", "Chemistry"],
+      "correctAnswer": ["Astronomy"]
+    }
+  ]
+}
