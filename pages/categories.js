@@ -1,18 +1,23 @@
+import styles from "../styles/category.module.css";
 import Link from "next/link";
+import Navbar from "./components/navBar";
 
 export default function Categories({ categories }) {
   return (
-    <div className="categories-container">
-      <h1>Please select a category to pass a quiz:</h1>
-      <ul>
-        {categories.map(({ name, src }, index) => (
-          <li key={index}>
-            <Link href={`/category/${name}`}>{name}</Link>
-            <img src={src} alt={name} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <Navbar />
+      <div className={styles.categoriesContainer}>
+        <h1>Please select a category to pass a quiz:</h1>
+        <ul>
+          {categories.map(({ name, src }, index) => (
+            <li key={index}>
+              <Link href={`/category/${name}`}>{name}</Link>
+              <img src={src} alt={name} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }
 
