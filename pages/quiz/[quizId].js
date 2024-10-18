@@ -1,22 +1,33 @@
+import styles from "../../styles/quiz.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Navbar from "../components/navBar";
 
 export default function Quiz({ quiz }) {
   const router = useRouter();
   const { quizId } = router.query;
-  const questions = quiz.questions;
+  const questions = quiz?.questions;
 
   return (
-    <div class="quiz-container">
-      <h1>Please select a question to pass the quiz:</h1>
-      <ul>
-        {questions.map(({ question, id }, index) => (
-          <li key={index}>
-            <Link href={`/quiz/${quizId}/question/${id}`}>{question}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <Navbar />
+      <div className={styles.quizContainer}>
+        <h1>These are the question of the quiz:</h1>
+        <h2>{quiz.name}</h2>
+        <ul>
+          {questions.map(({ question, id }, index) => (
+            <li key={index}>
+              <p>{question}</p>
+            </li>
+          ))}
+        </ul>
+        <button>
+          <Link href={`/quiz/${quizId}/question/${questions[0].id}`}>
+            Start quiz
+          </Link>
+        </button>
+      </div>
+    </>
   );
 }
 
