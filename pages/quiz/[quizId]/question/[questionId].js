@@ -1,75 +1,113 @@
 import style from "../../../../styles/question.module.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../../components/navBar";
+import { useQuizContext } from "@/contexts/quiz/quizContext";
 
-export default function Quiz({ question, nextQuestionId, quizId }) {
+export default function Quiz() {
   const router = useRouter();
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [score, setScore] = useState(0); // Track score state
-  const [hasSubmitted, setHasSubmitted] = useState(false); // Prevent double submission
+  const { sharedQuiz } = useQuizContext();
+
+  const [quizData, setQuizData] = useState({
+    quiz: null,
+    question: null,
+    nextQuestionId: null,
+  });
+  const [selectedOption, setSelectedOption] = useState();
+  const [score, setScore] = useState(0);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
-  // Handle option selection
-  const handleOptionChange = (event) => {
+  const quizId = useMemo(() => router.query.quizId, [router.query.quizId]);
+
+  const handleOptionChange = useCallback((event) => {
     const { value, checked } = event.target;
-    setSelectedOptions((prevOptions) =>
-      checked
-        ? [...prevOptions, value]
-        : prevOptions.filter((opt) => opt !== value)
-    );
-  };
+    setSelectedOption(() => (checked ? [value] : null));
+  }, []);
+
+  const loadQuiz = useCallback(
+    async (quiz = null) => {
+      try {
+        const questionId = router.query.questionId;
+
+        if (!quiz) {
+          const request = await fetch(`http://localhost:3000/${quizId}.json`);
+          quiz = await request.json();
+        }
+
+        const question = quiz?.questions?.find(({ id }) => id == questionId);
+        const nextQuestionId = getNextQuestionId(quiz, question);
+
+        setQuizData({ quiz, question, nextQuestionId });
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      }
+    },
+    [router.query.questionId, quizId]
+  );
+
+  const getNextQuestionId = useCallback((quiz, question) => {
+    const currentQuestionIndex = quiz.questions.indexOf(question);
+    const nextQuestionIndex = currentQuestionIndex + 1;
+
+    return nextQuestionIndex < quiz.questions.length
+      ? quiz.questions[nextQuestionIndex].id
+      : null;
+  }, []);
+
+  useEffect(() => {
+    const { newQuiz } = sharedQuiz;
+    loadQuiz(newQuiz);
+  }, [router, sharedQuiz, loadQuiz]);
 
   useEffect(() => {
     if (shouldRedirect) {
       router.push({
         pathname: `/quiz/${quizId}/result`,
-        query: { score: score },
+        query: { score },
       });
     }
-  }, [score, shouldRedirect, quizId, router]);
+  }, [shouldRedirect, score, router, quizId]);
 
-  // Check the answer and update score
   const handleSubmit = (event) => {
     event.preventDefault();
+    const { question } = quizData;
 
-    if (hasSubmitted) return; // Prevent multiple submissions
-    setHasSubmitted(true); // Disable submission after first click
+    if (hasSubmitted) return;
+
+    setHasSubmitted(true);
 
     const isCorrect =
-      selectedOptions.every((option) =>
-        question.correctAnswer.includes(option)
-      ) && selectedOptions.length === question.correctAnswer.length;
+      selectedOption == question.answers[question.correctAnswer];
 
     if (isCorrect) {
       alert("Correct! Your answer is correct!!!");
-      setScore((prevScore) => prevScore + 1); // Update score
+      setScore((prevScore) => prevScore + 1);
     } else {
       alert("Incorrect answer!");
     }
 
-    setSelectedOptions([]); // Reset selected options
+    setSelectedOption(null);
 
-    if (nextQuestionId !== null) {
+    if (quizData.nextQuestionId !== null) {
       redirectNextQuestion();
     } else {
-      setShouldRedirect(true); // Trigger redirect after score is updated
+      setShouldRedirect(true);
     }
   };
 
-  // Redirect to the next question
   const redirectNextQuestion = () => {
-    setHasSubmitted(false); // Allow new submissions for the next question
-    router.push(`/quiz/${quizId}/question/${nextQuestionId}`);
+    setHasSubmitted(false);
+    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
   };
 
   return (
     <>
       <Navbar />
       <div className={style.questionContainer}>
-        <h2>Question: {question.question}</h2>
+        <h2>Question: {quizData.question?.question}</h2>
         <form className={style.optionsForm} onSubmit={handleSubmit}>
-          {question.answers.map((option, index) => (
+          {quizData.question?.answers?.map((option, index) => (
             <div className={style.option} key={index}>
               <input
                 type="checkbox"
@@ -77,8 +115,9 @@ export default function Quiz({ question, nextQuestionId, quizId }) {
                 name="question"
                 value={option}
                 onChange={handleOptionChange}
-                checked={selectedOptions.includes(option)}
-                disabled={hasSubmitted} // Disable interaction after submission
+                checked={option == selectedOption}
+                disabled={hasSubmitted}
+                aria-label={`Option ${index + 1}`}
               />
               <label htmlFor={`option-${index}`}>{option}</label>
             </div>
@@ -86,7 +125,7 @@ export default function Quiz({ question, nextQuestionId, quizId }) {
           <button
             type="submit"
             className={style.submitButton}
-            disabled={hasSubmitted} // Prevent multiple submissions
+            disabled={hasSubmitted}
           >
             Answer
           </button>
@@ -94,34 +133,4 @@ export default function Quiz({ question, nextQuestionId, quizId }) {
       </div>
     </>
   );
-}
-
-export async function getServerSideProps({ params }) {
-  try {
-    const request = await fetch(`http://localhost:3000/${params.quizId}.json`);
-    const quiz = await request.json();
-    const question = quiz.questions.find(({ id }) => id == params.questionId);
-
-    // Calculate next question ID
-    const currentQuestionIndex = quiz.questions.indexOf(question);
-    const nextQuestionIndex = currentQuestionIndex + 1;
-    let nextQuestionId = null;
-
-    if (nextQuestionIndex < quiz.questions.length) {
-      nextQuestionId = quiz.questions[nextQuestionIndex].id;
-    }
-
-    return {
-      props: {
-        question,
-        nextQuestionId,
-        quizId: params.quizId,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching quiz data:", error);
-    return {
-      notFound: true,
-    };
-  }
 }
