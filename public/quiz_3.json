@@ -1,0 +1,33 @@
+{
+  "questions": [
+    {
+      "question": "Who was the first President of the United States?",
+      "id": "question1",
+      "answers": [
+        "Abraham Lincoln",
+        "George Washington",
+        "Thomas Jefferson",
+        "John Adams"
+      ],
+      "correctAnswer": ["George Washington"]
+    },
+    {
+      "question": "Which ancient civilization built the pyramids?",
+      "id": "question2",
+      "answers": ["Mesopotamians", "Romans", "Egyptians", "Greeks"],
+      "correctAnswer": ["Egyptians"]
+    },
+    {
+      "question": "In which year did World War II end?",
+      "id": "question3",
+      "answers": ["1939", "1941", "1945", "1950"],
+      "correctAnswer": ["1945"]
+    },
+    {
+      "question": "Who was known as the 'Maid of Orleans'?",
+      "id": "question4",
+      "answers": ["Cleopatra", "Joan of Arc", "Queen Victoria", "Marie Curie"],
+      "correctAnswer": ["Joan of Arc"]
+    }
+  ]
+}
