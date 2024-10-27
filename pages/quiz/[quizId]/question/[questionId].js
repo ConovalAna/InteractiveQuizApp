@@ -16,6 +16,7 @@ export default function Quiz() {
   const [selectedOption, setSelectedOption] = useState();
   const [score, setScore] = useState(0);
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [showToast, setShowToast] = useState(null); // New state for toast
 
   const quizId = useMemo(() => router.query.quizId, [router.query.quizId]);
 
@@ -68,9 +69,20 @@ export default function Quiz() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const { question } = quizData;
+    if (!question.answered) {
+      return;
+    }
+
+    setSelectedOption(null);
+
+    handleNextStep();
+  };
+
+  const handleOnAswerClick = (event) => {
+    event.preventDefault();
+    const { question } = quizData;
 
     if (question.answered) {
-      // Prevent re-submitting if already answered
       handleNextStep();
       return;
     }
@@ -87,22 +99,20 @@ export default function Quiz() {
           ...prevQuizData.quiz,
           questions: updatedQuestions,
         },
-        question: { ...question, answered: true }, // Update current question
+        question: { ...question, answered: true },
       };
     });
+
     const isCorrect =
       selectedOption == question.answers[question.correctAnswer];
 
-    if (isCorrect) {
-      alert("Correct! Your answer is correct!!!");
-      setScore((prevScore) => prevScore + 1);
-    } else {
-      alert("Incorrect answer!");
-    }
+    setShowToast(
+      isCorrect ? "Correct! Your answer is correct!" : "Incorrect answer!"
+    ); // Show toast
+    if (isCorrect) setScore((prevScore) => prevScore + 1);
 
-    setSelectedOption(null);
-
-    handleNextStep();
+    // Hide toast after a delay
+    setTimeout(() => setShowToast(null), 3000);
   };
 
   const redirectNextQuestion = () => {
@@ -124,7 +134,19 @@ export default function Quiz() {
         <h2>Question: {quizData.question?.question}</h2>
         <form className={style.optionsForm} onSubmit={handleSubmit}>
           {quizData.question?.answers?.map((option, index) => (
-            <div className={style.option} key={index}>
+            <div
+              className={`${style.option} ${
+                quizData.question.answered
+                  ? option ===
+                    quizData.question.answers[quizData.question.correctAnswer]
+                    ? style.correctAnswer
+                    : option === selectedOption
+                    ? style.wrongAnswer
+                    : ""
+                  : ""
+              }`}
+              key={index}
+            >
               <input
                 type="checkbox"
                 id={`option-${index}`}
@@ -132,25 +154,27 @@ export default function Quiz() {
                 value={option}
                 onChange={handleOptionChange}
                 checked={option === selectedOption}
-                disabled={quizData.question?.answered} // Disable if answered
+                disabled={quizData.question?.answered}
                 aria-label={`Option ${index + 1}`}
               />
               <label htmlFor={`option-${index}`}>{option}</label>
             </div>
           ))}
           <button
-            type="submit"
+            type="button"
+            onClick={handleOnAswerClick}
             className={style.submitButton}
-            disabled={quizData.question?.answered} // Disable submit if answered
+            disabled={quizData.question?.answered}
           >
             Answer
           </button>
           {quizData?.question?.answered && (
             <button type="submit" className={style.submitButton}>
-              Next Question
+              {quizData.nextQuestionId ? "Next Question" : "Finish Quiz"}
             </button>
           )}
         </form>
+        {showToast && <div className={style.toast}>{showToast}</div>}{" "}
       </div>
     </>
   );

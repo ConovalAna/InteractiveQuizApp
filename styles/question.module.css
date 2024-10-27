@@ -2,7 +2,7 @@
 .questionContainer {
   font-family: "Arial", sans-serif;
   padding: 20px;
-  background-color: #8da4da8a;
+  background-color: rgba(141, 164, 218, 0.5);
   border-radius: 12px;
   max-width: 600px;
   margin: 40px auto;
@@ -22,25 +22,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
 }
 
 /* Individual option container */
 .option {
-  margin: 10px 0;
   width: 100%;
   position: relative;
 }
 
-/* Checkbox styling (hide default) */
 .option input[type="checkbox"] {
   display: none;
 }
 
-/* Label styles */
 .option label {
   display: block;
   padding: 15px;
-  background-color: #859cd361;
+  background-color: rgba(133, 156, 211, 0.5);
   border: 2px solid #ccc;
   border-radius: 8px;
   font-size: 1.2em;
@@ -51,7 +49,10 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom styles when option is selected */
+.option label:hover {
+  background-color: rgba(241, 241, 241, 0.9);
+}
+
 .option input[type="checkbox"]:checked + label {
   background-color: #007bff;
   color: white;
@@ -59,12 +60,25 @@
   box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
 }
 
-/* Hover effect */
-.option label:hover {
-  background-color: #f1f1f1;
+/* Correct answer styling */
+.correctAnswer input[type="checkbox"]:checked + label,
+.correctAnswer label {
+  background-color: #28a745;
+  color: #fff;
+  border-color: #28a745;
+  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.4);
 }
 
-/* Submit button */
+/* Wrong answer styling */
+.wrongAnswer input[type="checkbox"]:checked + label,
+.wrongAnswer label {
+  background-color: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+  box-shadow: 0 2px 10px rgba(220, 53, 69, 0.4);
+}
+
+/* Submit button styling */
 .submitButton {
   margin-top: 20px;
   padding: 12px 30px;
@@ -88,6 +102,30 @@
   color: #f4f4f4;
   cursor: not-allowed;
   box-shadow: none;
-  transform: none;
   opacity: 0.7;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-size: 1em;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
 }
