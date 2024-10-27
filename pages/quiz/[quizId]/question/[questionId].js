@@ -15,36 +15,32 @@ export default function Quiz() {
   });
   const [selectedOption, setSelectedOption] = useState();
   const [score, setScore] = useState(0);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const quizId = useMemo(() => router.query.quizId, [router.query.quizId]);
 
   const handleOptionChange = useCallback((event) => {
     const { value, checked } = event.target;
-    setSelectedOption(() => (checked ? [value] : null));
+    setSelectedOption(() => (checked ? value : null));
   }, []);
 
-  const loadQuiz = useCallback(
-    async (quiz = null) => {
-      try {
-        const questionId = router.query.questionId;
-
-        if (!quiz) {
-          const request = await fetch(`http://localhost:3000/${quizId}.json`);
-          quiz = await request.json();
-        }
-
-        const question = quiz?.questions?.find(({ id }) => id == questionId);
-        const nextQuestionId = getNextQuestionId(quiz, question);
-
-        setQuizData({ quiz, question, nextQuestionId });
-      } catch (error) {
-        console.error("Error fetching quiz data:", error);
+  const loadQuiz = useCallback(async () => {
+    try {
+      const questionId = router.query.questionId;
+      let quiz = quizData?.quiz;
+      if (!quiz) {
+        const request = await fetch(`http://localhost:3000/${quizId}.json`);
+        quiz = await request.json();
       }
-    },
-    [router.query.questionId, quizId]
-  );
+
+      const question = quiz?.questions?.find(({ id }) => id == questionId);
+      const nextQuestionId = getNextQuestionId(quiz, question);
+
+      setQuizData({ quiz, question, nextQuestionId });
+    } catch (error) {
+      console.error("Error fetching quiz data:", error);
+    }
+  }, [router.query.questionId, quizId]);
 
   const getNextQuestionId = useCallback((quiz, question) => {
     const currentQuestionIndex = quiz.questions.indexOf(question);
@@ -73,10 +69,27 @@ export default function Quiz() {
     event.preventDefault();
     const { question } = quizData;
 
-    if (hasSubmitted) return;
+    if (question.answered) {
+      // Prevent re-submitting if already answered
+      handleNextStep();
+      return;
+    }
 
-    setHasSubmitted(true);
+    // Mark the question as answered
+    setQuizData((prevQuizData) => {
+      const updatedQuestions = prevQuizData.quiz.questions.map((q) =>
+        q.id === question.id ? { ...q, answered: true } : q
+      );
 
+      return {
+        ...prevQuizData,
+        quiz: {
+          ...prevQuizData.quiz,
+          questions: updatedQuestions,
+        },
+        question: { ...question, answered: true }, // Update current question
+      };
+    });
     const isCorrect =
       selectedOption == question.answers[question.correctAnswer];
 
@@ -89,17 +102,20 @@ export default function Quiz() {
 
     setSelectedOption(null);
 
+    handleNextStep();
+  };
+
+  const redirectNextQuestion = () => {
+    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
+  };
+
+  function handleNextStep() {
     if (quizData.nextQuestionId !== null) {
       redirectNextQuestion();
     } else {
       setShouldRedirect(true);
     }
-  };
-
-  const redirectNextQuestion = () => {
-    setHasSubmitted(false);
-    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
-  };
+  }
 
   return (
     <>
@@ -115,8 +131,8 @@ export default function Quiz() {
                 name="question"
                 value={option}
                 onChange={handleOptionChange}
-                checked={option == selectedOption}
-                disabled={hasSubmitted}
+                checked={option === selectedOption}
+                disabled={quizData.question?.answered} // Disable if answered
                 aria-label={`Option ${index + 1}`}
               />
               <label htmlFor={`option-${index}`}>{option}</label>
@@ -125,10 +141,15 @@ export default function Quiz() {
           <button
             type="submit"
             className={style.submitButton}
-            disabled={hasSubmitted}
+            disabled={quizData.question?.answered} // Disable submit if answered
           >
             Answer
           </button>
+          {quizData?.question?.answered && (
+            <button type="submit" className={style.submitButton}>
+              Next Question
+            </button>
+          )}
         </form>
       </div>
     </>

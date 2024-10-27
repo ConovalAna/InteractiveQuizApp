@@ -82,3 +82,12 @@
   background-color: #0056b3;
   transform: translateY(-2px);
 }
+
+.submitButton:disabled {
+  background-color: #65a7ed;
+  color: #f4f4f4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.7;
+}
