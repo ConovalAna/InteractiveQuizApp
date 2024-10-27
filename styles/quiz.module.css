@@ -26,6 +26,8 @@
 
 /* List item styles */
 .quizContainer li {
+  font-size: 1.1em;
+  font-weight: 600;
   margin: 10px 0;
   padding: 10px;
   border: 2px solid #ccc;
@@ -62,6 +64,108 @@
 }
 
 .quizContainer button a {
+  font-size: 1.1em;
+  font-weight: 600;
   color: #ffffff;
   text-decoration: none;
+}
+
+/*Add Question*/
+
+.addQuestionForm {
+  margin-top: 20px;
+  padding: 25px;
+  background-color: rgba(249, 250, 251, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.addQuestionForm:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.addQuestionForm label {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.addQuestionForm input[type="text"],
+.addQuestionForm select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  font-size: 1em;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.addQuestionForm input[type="text"]:focus,
+.addQuestionForm select:focus {
+  border-color: #3b82f6;
+  background-color: #f0f9ff;
+  outline: none;
+}
+
+.addQuestionForm button {
+  margin-top: 15px;
+  padding: 12px 16px;
+  border: none;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.addQuestionForm button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+  background-color: #2563eb;
+}
+
+.addQuestionForm .answerField {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.addQuestionForm .answerField input[type="text"] {
+  flex-grow: 1;
+  margin-right: 10px;
+  margin-bottom: 0;
+}
+
+.addQuestionForm .answerField button {
+  background-color: #f87171;
+  border: none;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 0.9em;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.addQuestionForm .answerField button:hover {
+  background-color: #ef4444;
+}
+
+.buttonGrupFlex {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }

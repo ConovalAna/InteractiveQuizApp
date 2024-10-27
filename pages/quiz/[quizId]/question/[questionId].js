@@ -1,127 +1,181 @@
 import style from "../../../../styles/question.module.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../../components/navBar";
+import { useQuizContext } from "@/contexts/quiz/quizContext";
 
-export default function Quiz({ question, nextQuestionId, quizId }) {
+export default function Quiz() {
   const router = useRouter();
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [score, setScore] = useState(0); // Track score state
-  const [hasSubmitted, setHasSubmitted] = useState(false); // Prevent double submission
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const { sharedQuiz } = useQuizContext();
 
-  // Handle option selection
-  const handleOptionChange = (event) => {
+  const [quizData, setQuizData] = useState({
+    quiz: null,
+    question: null,
+    nextQuestionId: null,
+  });
+  const [selectedOption, setSelectedOption] = useState();
+  const [score, setScore] = useState(0);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [showToast, setShowToast] = useState(null); // New state for toast
+
+  const quizId = useMemo(() => router.query.quizId, [router.query.quizId]);
+
+  const handleOptionChange = useCallback((event) => {
     const { value, checked } = event.target;
-    setSelectedOptions((prevOptions) =>
-      checked
-        ? [...prevOptions, value]
-        : prevOptions.filter((opt) => opt !== value)
-    );
-  };
+    setSelectedOption(() => (checked ? value : null));
+  }, []);
+
+  const loadQuiz = useCallback(async () => {
+    try {
+      const questionId = router.query.questionId;
+      let quiz = quizData?.quiz;
+      if (!quiz) {
+        const request = await fetch(`http://localhost:3000/${quizId}.json`);
+        quiz = await request.json();
+      }
+
+      const question = quiz?.questions?.find(({ id }) => id == questionId);
+      const nextQuestionId = getNextQuestionId(quiz, question);
+
+      setQuizData({ quiz, question, nextQuestionId });
+    } catch (error) {
+      console.error("Error fetching quiz data:", error);
+    }
+  }, [router.query.questionId, quizId]);
+
+  const getNextQuestionId = useCallback((quiz, question) => {
+    const currentQuestionIndex = quiz.questions.indexOf(question);
+    const nextQuestionIndex = currentQuestionIndex + 1;
+
+    return nextQuestionIndex < quiz.questions.length
+      ? quiz.questions[nextQuestionIndex].id
+      : null;
+  }, []);
+
+  useEffect(() => {
+    const { newQuiz } = sharedQuiz;
+    loadQuiz(newQuiz);
+  }, [router, sharedQuiz, loadQuiz]);
 
   useEffect(() => {
     if (shouldRedirect) {
       router.push({
         pathname: `/quiz/${quizId}/result`,
-        query: { score: score },
+        query: { score },
       });
     }
-  }, [score, shouldRedirect, quizId, router]);
+  }, [shouldRedirect, score, router, quizId]);
 
-  // Check the answer and update score
   const handleSubmit = (event) => {
     event.preventDefault();
+    const { question } = quizData;
+    if (!question.answered) {
+      return;
+    }
 
-    if (hasSubmitted) return; // Prevent multiple submissions
-    setHasSubmitted(true); // Disable submission after first click
+    setSelectedOption(null);
+
+    handleNextStep();
+  };
+
+  const handleOnAswerClick = (event) => {
+    event.preventDefault();
+    const { question } = quizData;
+
+    if (question.answered) {
+      handleNextStep();
+      return;
+    }
+
+    // Mark the question as answered
+    setQuizData((prevQuizData) => {
+      const updatedQuestions = prevQuizData.quiz.questions.map((q) =>
+        q.id === question.id ? { ...q, answered: true } : q
+      );
+
+      return {
+        ...prevQuizData,
+        quiz: {
+          ...prevQuizData.quiz,
+          questions: updatedQuestions,
+        },
+        question: { ...question, answered: true },
+      };
+    });
 
     const isCorrect =
-      selectedOptions.every((option) =>
-        question.correctAnswer.includes(option)
-      ) && selectedOptions.length === question.correctAnswer.length;
+      selectedOption == question.answers[question.correctAnswer];
 
-    if (isCorrect) {
-      alert("Correct! Your answer is correct!!!");
-      setScore((prevScore) => prevScore + 1); // Update score
-    } else {
-      alert("Incorrect answer!");
-    }
+    setShowToast(
+      isCorrect ? "Correct! Your answer is correct!" : "Incorrect answer!"
+    ); // Show toast
+    if (isCorrect) setScore((prevScore) => prevScore + 1);
 
-    setSelectedOptions([]); // Reset selected options
+    // Hide toast after a delay
+    setTimeout(() => setShowToast(null), 3000);
+  };
 
-    if (nextQuestionId !== null) {
+  const redirectNextQuestion = () => {
+    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
+  };
+
+  function handleNextStep() {
+    if (quizData.nextQuestionId !== null) {
       redirectNextQuestion();
     } else {
-      setShouldRedirect(true); // Trigger redirect after score is updated
+      setShouldRedirect(true);
     }
-  };
-
-  // Redirect to the next question
-  const redirectNextQuestion = () => {
-    setHasSubmitted(false); // Allow new submissions for the next question
-    router.push(`/quiz/${quizId}/question/${nextQuestionId}`);
-  };
+  }
 
   return (
     <>
       <Navbar />
       <div className={style.questionContainer}>
-        <h2>Question: {question.question}</h2>
+        <h2>Question: {quizData.question?.question}</h2>
         <form className={style.optionsForm} onSubmit={handleSubmit}>
-          {question.answers.map((option, index) => (
-            <div className={style.option} key={index}>
+          {quizData.question?.answers?.map((option, index) => (
+            <div
+              className={`${style.option} ${
+                quizData.question.answered
+                  ? option ===
+                    quizData.question.answers[quizData.question.correctAnswer]
+                    ? style.correctAnswer
+                    : option === selectedOption
+                    ? style.wrongAnswer
+                    : ""
+                  : ""
+              }`}
+              key={index}
+            >
               <input
                 type="checkbox"
                 id={`option-${index}`}
                 name="question"
                 value={option}
                 onChange={handleOptionChange}
-                checked={selectedOptions.includes(option)}
-                disabled={hasSubmitted} // Disable interaction after submission
+                checked={option === selectedOption}
+                disabled={quizData.question?.answered}
+                aria-label={`Option ${index + 1}`}
               />
               <label htmlFor={`option-${index}`}>{option}</label>
             </div>
           ))}
           <button
-            type="submit"
+            type="button"
+            onClick={handleOnAswerClick}
             className={style.submitButton}
-            disabled={hasSubmitted} // Prevent multiple submissions
+            disabled={quizData.question?.answered}
           >
             Answer
           </button>
+          {quizData?.question?.answered && (
+            <button type="submit" className={style.submitButton}>
+              {quizData.nextQuestionId ? "Next Question" : "Finish Quiz"}
+            </button>
+          )}
         </form>
+        {showToast && <div className={style.toast}>{showToast}</div>}{" "}
       </div>
     </>
   );
-}
-
-export async function getServerSideProps({ params }) {
-  try {
-    const request = await fetch(`http://localhost:3000/${params.quizId}.json`);
-    const quiz = await request.json();
-    const question = quiz.questions.find(({ id }) => id == params.questionId);
-
-    // Calculate next question ID
-    const currentQuestionIndex = quiz.questions.indexOf(question);
-    const nextQuestionIndex = currentQuestionIndex + 1;
-    let nextQuestionId = null;
-
-    if (nextQuestionIndex < quiz.questions.length) {
-      nextQuestionId = quiz.questions[nextQuestionIndex].id;
-    }
-
-    return {
-      props: {
-        question,
-        nextQuestionId,
-        quizId: params.quizId,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching quiz data:", error);
-    return {
-      notFound: true,
-    };
-  }
 }

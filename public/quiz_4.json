@@ -10,13 +10,13 @@
         "Persian Empire",
         "Mongol Empire"
       ],
-      "correctAnswer": ["Roman Empire"]
+      "correctAnswer": 1
     },
     {
       "question": "What year did the Berlin Wall fall?",
       "id": "question2",
       "answers": ["1989", "1975", "1991", "1961"],
-      "correctAnswer": ["1989"]
+      "correctAnswer": 0
     },
     {
       "question": "Who was the first female Prime Minister of the United Kingdom?",
@@ -27,13 +27,13 @@
         "Theresa May",
         "Angela Merkel"
       ],
-      "correctAnswer": ["Margaret Thatcher"]
+      "correctAnswer": 0
     },
     {
       "question": "Which country was known as the 'Land of the Rising Sun'?",
       "id": "question4",
       "answers": ["China", "India", "Japan", "Thailand"],
-      "correctAnswer": ["Japan"]
+      "correctAnswer": 2
     }
   ]
 }

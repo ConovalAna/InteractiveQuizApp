@@ -1,8 +1,34 @@
 import styles from "../../styles//quiz.module.css";
 import Link from "next/link";
 import Navbar from "../components/navBar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
-export default function Category({ quizzes }) {
+export default function Category() {
+  const router = useRouter();
+  const [quizzes, setQuizzes] = useState([]);
+
+  useEffect(() => {
+    if (router.query.categoryId) {
+      loadQuizzes(router.query.categoryId);
+    }
+  }, [router.query]);
+
+  async function loadQuizzes(categoryId) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/${categoryId}/quizzes`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch quizzes");
+      }
+      const quizzesData = await response.json();
+      setQuizzes(quizzesData);
+    } catch (error) {
+      console.error("Error loading quizzes:", error);
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -20,44 +46,4 @@ export default function Category({ quizzes }) {
       </div>
     </>
   );
-}
-
-export async function getStaticProps({ params }) {
-  try {
-    const request = await fetch(
-      `http://localhost:3000/${params.categoryId}.json`
-    );
-    const quizzes = await request.json();
-
-    return {
-      props: { quizzes },
-    };
-  } catch (ex) {
-    console.error(ex);
-    return {
-      props: { quizzes: null },
-    };
-  }
-}
-
-export async function getStaticPaths() {
-  try {
-    const request = await fetch(`http://localhost:3000/categories.json`);
-    const categories = await request.json();
-
-    const paths = categories.map(({ name }) => {
-      return { params: { categoryId: name } };
-    });
-
-    return {
-      paths: paths,
-      fallback: false,
-    };
-  } catch (ex) {
-    console.error(ex);
-    return {
-      paths: [],
-      fallback: false,
-    };
-  }
 }
