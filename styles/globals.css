@@ -1,194 +1,43 @@
-/* Main container for the quiz category selection */
-.categories-container {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  text-align: center;
-  background-color: #f9f9f9;
-}
-
-/* Heading style */
-.categories-container h1 {
-  font-size: 2em;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-/* Unordered list styles */
-.categories-container ul {
-  list-style-type: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* List item styles */
-.categories-container li {
-  margin: 10px;
-  padding: 15px;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  width: 200px;
-}
-
-/* Anchor styles */
-.categories-container a {
-  text-decoration: none;
-  font-size: 1.2em;
-  color: #007bff;
-}
-
-/* Image styles */
-.categories-container img {
-  width: 100%;
-  height: auto;
-  margin-top: 10px;
-  border-radius: 8px;
-}
-
-/* Hover effect on list items */
-.categories-container li:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.main-container {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  text-align: center;
-  background-color: #f9f9f9;
-}
-
-.quiz-container {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  text-align: center;
-  background-color: #f0f0f0;
-  border-radius: 10px;
-  max-width: 800px;
-  margin: 0 auto;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Heading style */
-.quiz-container h1 {
-  font-size: 2em;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-/* Unordered list styles */
-.quiz-container ul {
-  list-style-type: none;
-  padding: 0;
+/* Global settings */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* List item styles */
-.quiz-container li {
-  margin: 10px 0;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+/* Global font settings */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #7ba5d083;
+  color: #333;
 }
 
-/* Anchor styles */
-.quiz-container a {
+/* Global link styles */
+a {
   text-decoration: none;
-  font-size: 1.2em;
-  color: #007bff;
+  color: #18293b;
 }
 
-/* Hover effect on list items */
-.quiz-container li:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: #f9f9f9;
+a:hover {
+  color: #0056b3;
 }
 
-/* Container for the question */
-.question-container {
-  font-family: "Arial", sans-serif;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  max-width: 600px;
-  margin: 40px auto;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-/* Question text */
-.question-container h2 {
-  font-size: 1.8em;
+/* Global heading styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #333;
   margin-bottom: 20px;
-  color: #333;
 }
 
-/* Form containing options */
-.options-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+ul {
+  list-style-type: none;
+  padding: 0;
 }
 
-/* Individual option container */
-.option {
-  margin: 10px 0;
-  width: 100%;
-  position: relative;
-}
-
-/* Checkbox styling (hide default) */
-.option input[type="checkbox"] {
-  display: none;
-}
-
-/* Label styles */
-.option label {
-  display: block;
-  padding: 15px;
-  background-color: #ffffff;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  font-size: 1.2em;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Custom styles when option is selected */
-.option input[type="checkbox"]:checked + label {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
-}
-
-/* Hover effect */
-.option label:hover {
-  background-color: #f1f1f1;
-}
-
-/* Submit button */
-.submit-button {
-  margin-top: 20px;
-  padding: 12px 30px;
-  font-size: 1.2em;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.submit-button:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
+button {
+  font-family: inherit;
 }
