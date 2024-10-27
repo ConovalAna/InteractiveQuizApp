@@ -15,36 +15,33 @@ export default function Quiz() {
   });
   const [selectedOption, setSelectedOption] = useState();
   const [score, setScore] = useState(0);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [showToast, setShowToast] = useState(null); // New state for toast
 
   const quizId = useMemo(() => router.query.quizId, [router.query.quizId]);
 
   const handleOptionChange = useCallback((event) => {
     const { value, checked } = event.target;
-    setSelectedOption(() => (checked ? [value] : null));
+    setSelectedOption(() => (checked ? value : null));
   }, []);
 
-  const loadQuiz = useCallback(
-    async (quiz = null) => {
-      try {
-        const questionId = router.query.questionId;
-
-        if (!quiz) {
-          const request = await fetch(`http://localhost:3000/${quizId}.json`);
-          quiz = await request.json();
-        }
-
-        const question = quiz?.questions?.find(({ id }) => id == questionId);
-        const nextQuestionId = getNextQuestionId(quiz, question);
-
-        setQuizData({ quiz, question, nextQuestionId });
-      } catch (error) {
-        console.error("Error fetching quiz data:", error);
+  const loadQuiz = useCallback(async () => {
+    try {
+      const questionId = router.query.questionId;
+      let quiz = quizData?.quiz;
+      if (!quiz) {
+        const request = await fetch(`http://localhost:3000/${quizId}.json`);
+        quiz = await request.json();
       }
-    },
-    [router.query.questionId, quizId]
-  );
+
+      const question = quiz?.questions?.find(({ id }) => id == questionId);
+      const nextQuestionId = getNextQuestionId(quiz, question);
+
+      setQuizData({ quiz, question, nextQuestionId });
+    } catch (error) {
+      console.error("Error fetching quiz data:", error);
+    }
+  }, [router.query.questionId, quizId]);
 
   const getNextQuestionId = useCallback((quiz, question) => {
     const currentQuestionIndex = quiz.questions.indexOf(question);
@@ -72,34 +69,63 @@ export default function Quiz() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const { question } = quizData;
-
-    if (hasSubmitted) return;
-
-    setHasSubmitted(true);
-
-    const isCorrect =
-      selectedOption == question.answers[question.correctAnswer];
-
-    if (isCorrect) {
-      alert("Correct! Your answer is correct!!!");
-      setScore((prevScore) => prevScore + 1);
-    } else {
-      alert("Incorrect answer!");
+    if (!question.answered) {
+      return;
     }
 
     setSelectedOption(null);
 
+    handleNextStep();
+  };
+
+  const handleOnAswerClick = (event) => {
+    event.preventDefault();
+    const { question } = quizData;
+
+    if (question.answered) {
+      handleNextStep();
+      return;
+    }
+
+    // Mark the question as answered
+    setQuizData((prevQuizData) => {
+      const updatedQuestions = prevQuizData.quiz.questions.map((q) =>
+        q.id === question.id ? { ...q, answered: true } : q
+      );
+
+      return {
+        ...prevQuizData,
+        quiz: {
+          ...prevQuizData.quiz,
+          questions: updatedQuestions,
+        },
+        question: { ...question, answered: true },
+      };
+    });
+
+    const isCorrect =
+      selectedOption == question.answers[question.correctAnswer];
+
+    setShowToast(
+      isCorrect ? "Correct! Your answer is correct!" : "Incorrect answer!"
+    ); // Show toast
+    if (isCorrect) setScore((prevScore) => prevScore + 1);
+
+    // Hide toast after a delay
+    setTimeout(() => setShowToast(null), 3000);
+  };
+
+  const redirectNextQuestion = () => {
+    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
+  };
+
+  function handleNextStep() {
     if (quizData.nextQuestionId !== null) {
       redirectNextQuestion();
     } else {
       setShouldRedirect(true);
     }
-  };
-
-  const redirectNextQuestion = () => {
-    setHasSubmitted(false);
-    router.push(`/quiz/${quizId}/question/${quizData.nextQuestionId}`);
-  };
+  }
 
   return (
     <>
@@ -108,28 +134,47 @@ export default function Quiz() {
         <h2>Question: {quizData.question?.question}</h2>
         <form className={style.optionsForm} onSubmit={handleSubmit}>
           {quizData.question?.answers?.map((option, index) => (
-            <div className={style.option} key={index}>
+            <div
+              className={`${style.option} ${
+                quizData.question.answered
+                  ? option ===
+                    quizData.question.answers[quizData.question.correctAnswer]
+                    ? style.correctAnswer
+                    : option === selectedOption
+                    ? style.wrongAnswer
+                    : ""
+                  : ""
+              }`}
+              key={index}
+            >
               <input
                 type="checkbox"
                 id={`option-${index}`}
                 name="question"
                 value={option}
                 onChange={handleOptionChange}
-                checked={option == selectedOption}
-                disabled={hasSubmitted}
+                checked={option === selectedOption}
+                disabled={quizData.question?.answered}
                 aria-label={`Option ${index + 1}`}
               />
               <label htmlFor={`option-${index}`}>{option}</label>
             </div>
           ))}
           <button
-            type="submit"
+            type="button"
+            onClick={handleOnAswerClick}
             className={style.submitButton}
-            disabled={hasSubmitted}
+            disabled={quizData.question?.answered}
           >
             Answer
           </button>
+          {quizData?.question?.answered && (
+            <button type="submit" className={style.submitButton}>
+              {quizData.nextQuestionId ? "Next Question" : "Finish Quiz"}
+            </button>
+          )}
         </form>
+        {showToast && <div className={style.toast}>{showToast}</div>}{" "}
       </div>
     </>
   );
