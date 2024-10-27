@@ -1,0 +1,28 @@
+{
+  "questions": [
+    {
+      "question": "What is the chemical symbol for water?",
+      "id": "question1",
+      "answers": ["O2", "H2O", "CO2", "NaCl"],
+      "correctAnswer": ["H2O"]
+    },
+    {
+      "question": "Which planet is known as the Red Planet?",
+      "id": "question2",
+      "answers": ["Earth", "Venus", "Mars", "Jupiter"],
+      "correctAnswer": ["Mars"]
+    },
+    {
+      "question": "What gas do plants primarily absorb from the atmosphere?",
+      "id": "question3",
+      "answers": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+      "correctAnswer": ["Carbon Dioxide"]
+    },
+    {
+      "question": "What is the most abundant element in the universe?",
+      "id": "question4",
+      "answers": ["Oxygen", "Helium", "Carbon", "Hydrogen"],
+      "correctAnswer": ["Hydrogen"]
+    }
+  ]
+}
