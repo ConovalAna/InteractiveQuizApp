@@ -1,8 +1,15 @@
 import styles from "../styles/category.module.css";
 import Link from "next/link";
 import Navbar from "./components/navBar";
+import { useEffect, useState } from "react";
 
-export default function Categories({ categories }) {
+export default function Categories() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -11,7 +18,9 @@ export default function Categories({ categories }) {
         <ul>
           {categories.map(({ name, src }, index) => (
             <li key={index}>
-              <Link href={`/category/${name}`}>{name}</Link>
+              <Link href={`/category/${name}`} id="index">
+                {name}
+              </Link>
               <img src={src} alt={name} />
             </li>
           ))}
@@ -19,13 +28,11 @@ export default function Categories({ categories }) {
       </div>
     </>
   );
-}
 
-export async function getServerSideProps() {
-  const request = await fetch(`http://localhost:3000/categories.json`);
-  const categories = await request.json();
+  async function loadCategories() {
+    const request = await fetch(`http://localhost:3000/api/categories`);
+    const categories = await request.json();
 
-  return {
-    props: { categories },
-  };
+    setCategories(categories);
+  }
 }

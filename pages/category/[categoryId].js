@@ -1,8 +1,19 @@
 import styles from "../../styles//quiz.module.css";
 import Link from "next/link";
 import Navbar from "../components/navBar";
+import { useEffect, useState, createContext } from "react";
+import { useRouter } from "next/router";
 
-export default function Category({ quizzes }) {
+export default function Category() {
+  const router = useRouter();
+  const [quizzes, setQuizzes] = useState([]);
+
+  useEffect(() => {
+    if (router.query.categoryId) {
+      loadQuizzes(router.query.categoryId);
+    }
+  }, [router.query]);
+
   return (
     <>
       <Navbar />
@@ -20,44 +31,53 @@ export default function Category({ quizzes }) {
       </div>
     </>
   );
-}
 
-export async function getStaticProps({ params }) {
-  try {
+  async function loadQuizzes(categoryId) {
     const request = await fetch(
-      `http://localhost:3000/${params.categoryId}.json`
+      `http://localhost:3000/api/${categoryId}/quizzes`
     );
     const quizzes = await request.json();
 
-    return {
-      props: { quizzes },
-    };
-  } catch (ex) {
-    console.error(ex);
-    return {
-      props: { quizzes: null },
-    };
+    setQuizzes(quizzes);
   }
 }
 
-export async function getStaticPaths() {
-  try {
-    const request = await fetch(`http://localhost:3000/categories.json`);
-    const categories = await request.json();
+// export async function getStaticProps({ params }) {
+//   try {
+//     const request = await fetch(
+//       `http://localhost:3000/${params.categoryId}.json`
+//     );
+//     const quizzes = await request.json();
 
-    const paths = categories.map(({ name }) => {
-      return { params: { categoryId: name } };
-    });
+//     return {
+//       props: { quizzes },
+//     };
+//   } catch (ex) {
+//     console.error(ex);
+//     return {
+//       props: { quizzes: null },
+//     };
+//   }
+// }
 
-    return {
-      paths: paths,
-      fallback: false,
-    };
-  } catch (ex) {
-    console.error(ex);
-    return {
-      paths: [],
-      fallback: false,
-    };
-  }
-}
+// export async function getStaticPaths() {
+//   try {
+//     const request = await fetch(`http://localhost:3000/categories.json`);
+//     const categories = await request.json();
+
+//     const paths = categories.map(({ name }) => {
+//       return { params: { categoryId: name } };
+//     });
+
+//     return {
+//       paths: paths,
+//       fallback: false,
+//     };
+//   } catch (ex) {
+//     console.error(ex);
+//     return {
+//       paths: [],
+//       fallback: false,
+//     };
+//   }
+// }

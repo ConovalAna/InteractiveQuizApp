@@ -10,25 +10,25 @@
         "To create technology",
         "To keep records"
       ],
-      "correctAnswer": ["To explore the unknown"]
+      "correctAnswer": 1
     },
     {
       "question": "Which of the following is a branch of natural science?",
       "id": "question2",
       "answers": ["Literature", "Mathematics", "Biology", "Philosophy"],
-      "correctAnswer": ["Biology"]
+      "correctAnswer": 2
     },
     {
       "question": "What is the boiling point of water at sea level?",
       "id": "question3",
       "answers": ["90°C", "100°C", "110°C", "120°C"],
-      "correctAnswer": ["100°C"]
+      "correctAnswer": 1
     },
     {
       "question": "What is the study of the stars and planets known as?",
       "id": "question4",
       "answers": ["Geology", "Biology", "Astronomy", "Chemistry"],
-      "correctAnswer": ["Astronomy"]
+      "correctAnswer": 2
     }
   ]
 }
